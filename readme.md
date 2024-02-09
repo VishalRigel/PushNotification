@@ -12,18 +12,19 @@ This is an easy to use package to send push notification.
 * GCM
 * FCM
 * APN
+* More Push Service Providers coming soon.
 
 ## Installation
 
-### Laravel version below 5.8
+### Laravel 5.0 - 5.1
 
 type in console:
 
 ```
-composer require "edujugon/push-notification:^v3.0.0"
+composer require edujugon/push-notification:dev-laravel-5
 ```
 
-### Laravel 5.8/6 and higher
+### Laravel 5.2 and higher
 
 type in console:
 
@@ -31,7 +32,27 @@ type in console:
 composer require edujugon/push-notification
 ```
 
-The package will automatically register its service provider.
+## Laravel 5.*
+
+**Laravel 5.5 or higher?**
+
+Then you don't have to either register or add the alias, this package uses Package Auto-Discovery's feature, and should be available as soon as you install it via Composer.
+
+(Laravel < 5.5) Register the PushNotification service by adding it to the providers array.
+```php
+'providers' => array(
+    ...
+    Edujugon\PushNotification\Providers\PushNotificationServiceProvider::class
+)
+```
+
+(Laravel < 5.5) Let's add the Alias facade, add it to the aliases array.
+```php
+'aliases' => array(
+    ...
+    'PushNotification' => Edujugon\PushNotification\Facades\PushNotification::class,
+)
+```
 
 Publish the package's configuration file to the application's own config directory
 ```
@@ -42,7 +63,7 @@ php artisan vendor:publish --provider="Edujugon\PushNotification\Providers\PushN
 
 ### Configuration
 
-After publishing the configuration, you can find the Push service config in config/pushnotification.php
+The default configuration for all Push service providers is located in Config/config.php
 
 The default configuration parameters for **GCM** and **FCM** are :
 
@@ -67,8 +88,6 @@ The default configuration parameters for **APN** are:
 *   ```passFile => __DIR__ . '/iosCertificates/yourKey.pem' //Optional```
 *   ```dry_run => false```
 
-(Make sure to set `dry_run` to `true` if you're using development *.pem certificate, and `false` for production)
-
 Also you can update those values and add more dynamically
 ```php
 $push->setConfig([
@@ -84,21 +103,6 @@ $push->setUrl('http://newPushServiceUrl.com');
 ```
 
 > Not update the url unless it's really necessary.
-
-You can specify the number of client-side attempts to APN before giving
-up.  The default amount is 3 attempts.  You can override this value by
-specifying `connection_attempts` in `setConfig()` assoc-array.  Keep in
-mind the default number of requested attempts is 3.
-
-If you prefer to retry indefinitely, set `connection_attempts` to zero.
-
-    $push->setConfig([
-        'passPhrase' => 'NewPass',
-        'custom' => 'MycustomValue',
-        'connection_attempts' => 0,
-        'dry_run' => true
-    ]);
-
 
 ## Usage
 ```php
@@ -117,7 +121,7 @@ For FCM Service:
 $push = new PushNotification('fcm');
 ```
 
-Now you may use any method that you need. Please see the API List.
+Now you may use any method what you need. Please see the API List.
 
 
 ## API List
@@ -143,7 +147,7 @@ Now you may use any method that you need. Please see the API List.
 
 #### setService
 
-`setService` method sets the push service to be used, which you pass the name through parameter as a string.
+`setService` method sets the push service to be used, which you pass the name through parameter as string.
 
 **Syntax**
 
@@ -153,7 +157,7 @@ object setService($name)
 
 #### setMessage
 
-`setMessage` method sets the message parameters, which you pass the values through parameter as an array.
+`setMessage` method sets the message parameters, which you pass the values through parameter as array.
 
 **Syntax**
 
@@ -165,7 +169,7 @@ object setMessage(array $data)
 
 > Only for gcm and fcm
 
-`setApiKey` method sets the API Key of your App, which you pass the key through parameter as a string.
+`setApiKey` method sets the API Key of your App, which you pass the key through parameter as string.
 
 **Syntax**
 
@@ -239,7 +243,7 @@ object setUrl($url)
 
 > Only for fcm
 
-`sendBytopic` method sends a message by topic. It also accepts the topic condition. more details [here](https://firebase.google.com/docs/cloud-messaging/android/topic-messaging)
+`sendBytopic` method sends a message by topic. It also accepts topic condition. more details [here](https://firebase.google.com/docs/cloud-messaging/android/topic-messaging)
 >If isCondition is true, $topic will be treated as an expression
 
 **Syntax**
@@ -278,8 +282,7 @@ $push->setMessage([
                     'title' => 'This is the title',
                     'body' => 'This is the body'
                 ],
-                'sound' => 'default',
-                'badge' => 1
+                'sound' => 'default'
 
             ],
             'extraPayLoad' => [
@@ -385,7 +388,7 @@ $push->setMessage([
 
 #### Data Message
 
-By default, this package sends the notification as Data Message. So no need to add a `data` key.
+By default this package sends the notification as Data Message. So no need to add a `data` key. Just leave it without main keys.
 
 ```php
 $push->setMessage([
@@ -524,17 +527,6 @@ public function toApn($notifiable)
 }
 ```
 
-#### Customizing The Badge Number
-```php
-public function toApn($notifiable)
-{
-  return (new PushMessage)
-        ->body('Hello world')
-        ->sound('default')
-        ->badge(7);
-}
-```
-
 #### Passing Service Config
 ```php
 public function toApn($notifiable)
@@ -544,15 +536,6 @@ public function toApn($notifiable)
         ->config(['dry_run' => false]);
 }
 ```
-
-#### Add it to the notification channels
-```php
-public function via($notifiable)
-{
-    return [ApnChannel::class];
-}
-```
->Don't forget the use statement at the top of the class
 
 #### Routing Push Notifications
 Just define `routeNotificationForApn` and/or `routeNotificationForFcm`/`routeNotificationForGcm` methods on the entity

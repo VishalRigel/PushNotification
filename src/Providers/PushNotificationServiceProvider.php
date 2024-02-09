@@ -3,10 +3,9 @@
 namespace Edujugon\PushNotification\Providers;
 
 use Edujugon\PushNotification\PushNotification;
-use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
-class PushNotificationServiceProvider extends ServiceProvider implements DeferrableProvider
+class PushNotificationServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
@@ -15,38 +14,24 @@ class PushNotificationServiceProvider extends ServiceProvider implements Deferra
      */
     public function boot()
     {
-        if (! $this->app->runningInConsole()) {
-            return;
-        }
-
-        $configPath = $this->app->make('path.config');
+        $config_path = function_exists('config_path') ? config_path('pushnotification.php') : 'pushnotification.php';
 
         $this->publishes([
-            __DIR__.'/../Config/config.php' => $configPath.'/pushnotification.php',
-            __DIR__.'/../Config/iosCertificates' => $configPath.'/iosCertificates/',
+            __DIR__.'/../Config/config.php' => $config_path,
+            __DIR__.'/../Config/iosCertificates' => config_path('iosCertificates/')
         ], 'config');
     }
 
     /**
-     * {@inheritdoc}
+     * Register the application services.
+     *
+     * @return void
      */
     public function register()
     {
-        $this->app->singleton('edujugonPushNotification', function ($app) {
+        $this->app->singleton('edujugonPushNotification',function($app)
+        {
             return new PushNotification();
         });
-
-        $this->app->bind(PushNotification::class, 'edujugonPushNotification');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function provides()
-    {
-        return [
-            PushNotification::class,
-            'edujugonPushNotification',
-        ];
     }
 }

@@ -1,18 +1,16 @@
 <?php
 
 
-use PHPUnit\Framework\TestCase;
 use Edujugon\PushNotification\PushNotification;
-use Illuminate\Support\Arr;
 
-class PushNotificationTest extends TestCase {
+class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
     /** @test */
     public function push_notification_instance_creation_without_argument_set_gcm_as_service()
     {
         $push = new PushNotification();
 
-        $this->assertInstanceOf('Edujugon\PushNotification\Gcm', $push->service);
+        $this->assertInstanceOf('Edujugon\PushNotification\Gcm',$push->service);
     }
 
     /** @test */
@@ -27,7 +25,7 @@ class PushNotificationTest extends TestCase {
 
         $push = $push->send();
 
-        $this->assertInstanceOf('stdClass', $push->getFeedback());
+        $this->assertInstanceOf('stdClass',$push->getFeedback());
 
     }
     /** @test */
@@ -58,47 +56,47 @@ class PushNotificationTest extends TestCase {
             ->setMessage(['message' =>'hello world'])
             ->send();
 
-        $this->assertIsArray($push->getUnregisteredDeviceTokens());
+        $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
+
     }
 
     /** @test */
-    public function set_and_get_service_config()
-    {
+    public function set_and_get_service_config(){
 
         /** GCM */
         $push = new PushNotification();
 
         $push->setConfig(['time_to_live' => 3]);
 
-        $this->assertArrayHasKey('time_to_live', $push->config);
-        $this->assertArrayHasKey('priority', $push->config); //default key
-        $this->assertIsArray($push->config);
+        $this->assertArrayHasKey('time_to_live',$push->config);
+        $this->assertArrayHasKey('priority',$push->config); //default key
+        $this->assertInternalType('array',$push->config);
 
         /** APNS */
         $pushAPN = new PushNotification('apn');
 
         $pushAPN->setConfig(['time_to_live' => 3]);
 
-        $this->assertArrayHasKey('time_to_live', $pushAPN->config);
-        $this->assertArrayHasKey('certificate', $pushAPN->config); //default key
-        $this->assertIsArray($pushAPN->config);
+        $this->assertArrayHasKey('time_to_live',$pushAPN->config);
+        $this->assertArrayHasKey('certificate',$pushAPN->config); //default key
+        $this->assertInternalType('array',$pushAPN->config);
     }
 
     /** @test */
-    public function set_message_data()
-    {
+    public function set_message_data(){
+
         $push = new PushNotification();
 
         $push->setMessage(['message' =>'hello world']);
 
-        $this->assertArrayHasKey('message', $push->message);
+        $this->assertArrayHasKey('message',$push->message);
 
-        $this->assertEquals('hello world', $push->message['message']);
+        $this->assertEquals('hello world',$push->message['message']);
+
     }
 
     /** @test */
-    public function send_method_in_apn_service()
-    {
+    public function send_method_in_apn_service(){
         $push = new PushNotification('apn');
 
         $message = [
@@ -121,8 +119,8 @@ class PushNotificationTest extends TestCase {
 
         $push = $push->send();
         //var_dump($push->getFeedback());
-        $this->assertInstanceOf('stdClass', $push->getFeedback());
-        $this->assertIsArray($push->getUnregisteredDeviceTokens());
+        $this->assertInstanceOf('stdClass',$push->getFeedback());
+        $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
     }
 
     /** @test */
@@ -137,6 +135,21 @@ class PushNotificationTest extends TestCase {
     }
 
     /** @test */
+    public function apn_dry_run_option_update_the_apn_url()
+    {
+        $push = new PushNotification('apn');
+
+        $push->setConfig(['dry_run'=>false]);
+
+        $this->assertEquals('ssl://gateway.push.apple.com:2195',$push->url);
+
+        $push->setConfig(['dry_run'=>true]);
+
+        $this->assertEquals('ssl://gateway.sandbox.push.apple.com:2195',$push->url);
+    }
+
+
+    /** @test */
     public function fcm_assert_send_method_returns_an_stdClass_instance()
     {
         $push = new PushNotification('fcm');
@@ -148,8 +161,9 @@ class PushNotificationTest extends TestCase {
 
         $push = $push->send();
 
-        $this->assertEquals('https://fcm.googleapis.com/fcm/send', $push->url);
-        $this->assertInstanceOf('stdClass', $push->getFeedback());
+        $this->assertEquals('https://fcm.googleapis.com/fcm/send',$push->url);
+        $this->assertInstanceOf('stdClass',$push->getFeedback());
+
     }
 
     /** @test */
@@ -157,16 +171,17 @@ class PushNotificationTest extends TestCase {
     {
         $push = new PushNotification('asdf');
 
-        $this->assertInstanceOf('Edujugon\PushNotification\Gcm', $push->service);
-    }
+        $this->assertInstanceOf('Edujugon\PushNotification\Gcm',$push->service);
 
+
+    }
     /** @test */
     public function get_available_push_service_list()
     {
         $push = new PushNotification();
 
-        $this->assertCount(3, $push->servicesList);
-        $this->assertIsArray($push->servicesList);
+        $this->assertCount(3,$push->servicesList);
+        $this->assertInternalType('array',$push->servicesList);
     }
 
     /** @test */
@@ -174,10 +189,10 @@ class PushNotificationTest extends TestCase {
         $push = new PushNotification();
 
         $push->setService('asdf')->send();
-        $this->assertInstanceOf('Edujugon\PushNotification\Gcm', $push->service);
+        $this->assertInstanceOf('Edujugon\PushNotification\Gcm',$push->service);
 
         $push->setService('fcm');
-        $this->assertInstanceOf('Edujugon\PushNotification\Fcm', $push->service);
+        $this->assertInstanceOf('Edujugon\PushNotification\Fcm',$push->service);
     }
 
     /** @test */
@@ -192,14 +207,14 @@ class PushNotificationTest extends TestCase {
             ->send()
             ->getFeedback();
 
-        $this->assertInstanceOf('stdClass', $response);
+        $this->assertInstanceOf('stdClass',$response);
     }
 
     /** @test */
     public function apn_feedback()
     {
-        $push = new PushNotification('apn');
 
+        $push = new PushNotification('apn');
         $message = [
             'aps' => [
                 'alert' => [
@@ -217,8 +232,9 @@ class PushNotificationTest extends TestCase {
             ]);
 
         $push->send();
-        $this->assertInstanceOf('stdClass', $push->getFeedback());
-        $this->assertIsArray($push->getUnregisteredDeviceTokens());
+        $this->assertInstanceOf('stdClass',$push->getFeedback());
+        $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
+
     }
 
 
@@ -233,7 +249,7 @@ class PushNotificationTest extends TestCase {
             ->send()
             ->getFeedback();
 
-        $this->assertInstanceOf('stdClass', $response);
+        $this->assertInstanceOf('stdClass',$response);
 
     }
 
@@ -261,21 +277,20 @@ class PushNotificationTest extends TestCase {
                 ]
             ]
         ];
-        $merge = array_merge($primary, $array);
-        $obj = json_decode(json_encode($merge));
+        $merge = array_merge($primary,$array);
+        $obj = json_decode(json_encode($merge), FALSE);
 
         $tokens = [];
 
-        if (! empty($obj->tokenFailList)) {
+        if(! empty($obj->tokenFailList))
             $tokens =  $obj->tokenFailList;
-        }
-        if (!empty($obj->apnsFeedback)) {
-            $tokens = array_merge($tokens, Arr::pluck($obj->apnsFeedback, 'devtoken'));
-        }
+        if(!empty($obj->apnsFeedback))
+            $tokens = array_merge($tokens,array_pluck($obj->apnsFeedback,'devtoken'));
 
-        $this->assertTrue(true);
+        //var_dump($tokens);
     }
 
+    /** @test */
     public function send_a_notification_by_topic_in_fcm()
     {
         $push = new PushNotification('fcm');
@@ -286,7 +301,7 @@ class PushNotificationTest extends TestCase {
             ->sendByTopic('test')
             ->getFeedback();
 
-        $this->assertInstanceOf('stdClass', $response);
+        $this->assertInstanceOf('stdClass',$response);
     }
 
     /** @test */
@@ -297,76 +312,9 @@ class PushNotificationTest extends TestCase {
         $response = $push->setMessage(['message'=>'Hello World'])
             ->setApiKey('asdfasdffasdfasdfasdf')
             ->setConfig(['dry_run' => false])
-            ->sendByTopic("'dogs' in topics || 'cats' in topics", true)
+            ->sendByTopic("'dogs' in topics || 'cats' in topics",true)
             ->getFeedback();
 
-        $this->assertInstanceOf('stdClass', $response);
+        $this->assertInstanceOf('stdClass',$response);
     }
-  
-    /** @test */
-    public function apn_connection_attempts_default()
-    {
-        $push = new PushNotification('apn');
-
-        $push->setConfig(['dry_run' => true]);
-
-        $key = 'connection_attempts';
-        $this->assertArrayNotHasKey($key, $push->config);
-    }
-
-    /** @test */
-    public function set_apn_connect_attempts_override_default()
-    {
-        $push = new PushNotification('apn');
-
-        $expected = 0;
-        $push->setConfig([
-            'dry_run' => true,
-            'connection_attempts' => $expected,
-        ]);
-
-        $key = 'connection_attempts';
-        $this->assertArrayHasKey($key, $push->config);
-        $this->assertEquals($expected, $push->config[$key]);
-    }
-
-    /** @test */
-    public function apn_connect_attempts_bailout_badcert()
-    {
-        $push = new PushNotification('apn');
-
-        $tmp_name = tempnam(sys_get_temp_dir(), 'apn-tmp');
-        $fh = fopen($tmp_name, 'w');
-        fwrite($fh, 'badcert');
-        fclose($fh);
-
-        $expected = 0;
-
-        // ZZZ: intentional failure use-case so let's not
-        // waste time attemping to push with a bad cert.
-        $push->setConfig([
-            'dry_run' => true,
-            'connection_attempts' => 1,
-            'certificate' => $tmp_name,
-        ]);
-
-        $message = [
-            'aps' => [
-                'alert' => [
-                    'title' => '1 Notification test',
-                    'body' => 'Just for testing purposes'
-                ],
-                'sound' => 'default'
-            ]
-        ];
-
-        $push->setMessage($message)
-            ->setDevicesToken(['507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c0312']);
-
-        $push = $push->send();
-        $this->assertInstanceOf('stdClass', $push->getFeedback());
-
-        unlink($tmp_name);
-    }
-
 }

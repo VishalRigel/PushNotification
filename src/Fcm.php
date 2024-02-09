@@ -1,5 +1,7 @@
 <?php
+
 namespace Edujugon\PushNotification;
+
 
 use GuzzleHttp\Client;
 
@@ -16,7 +18,7 @@ class Fcm extends Gcm
 
         $this->config = $this->initializeConfig('fcm');
 
-        $this->client = new Client($this->config['guzzle'] ?? []);
+        $this->client = new Client();
     }
 
     /**
@@ -28,7 +30,7 @@ class Fcm extends Gcm
      * @param bool $isCondition
      * @return object
      */
-    public function sendByTopic($topic, $message, $isCondition = false)
+    public function sendByTopic($topic,$message, $isCondition = false)
     {
         $headers = $this->addRequestHeaders();
         $data = $this->buildData($topic, $message, $isCondition);
@@ -44,12 +46,12 @@ class Fcm extends Gcm
 
             $json = $result->getBody();
 
-            $this->setFeedback(json_decode($json, false, 512, JSON_BIGINT_AS_STRING));
+            $this->setFeedback(json_decode($json));
 
         } catch (\Exception $e) {
             $response = ['success' => false, 'error' => $e->getMessage()];
 
-            $this->setFeedback(json_decode(json_encode($response)));
+            $this->setFeedback(json_decode(json_encode($response), FALSE));
 
         } finally {
             return $this->feedback;
@@ -68,6 +70,6 @@ class Fcm extends Gcm
     {
         $condition = $isCondition ? ['condition' => $topic] : ['to' => '/topics/' . $topic];
 
-        return array_merge($condition, $this->buildMessage($message));
+        return array_merge($condition , $this->buildMessage($message));
     }
 }

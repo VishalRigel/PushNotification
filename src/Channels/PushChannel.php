@@ -1,4 +1,5 @@
 <?php
+
 namespace Edujugon\PushNotification\Channels;
 
 use Edujugon\PushNotification\Events\NotificationPushed;
@@ -32,13 +33,13 @@ abstract class PushChannel
      */
     public function send($notifiable, Notification $notification)
     {
-        $message = $this->buildMessage($notifiable, $notification);
-        $data = $this->buildData($message);
-        $to = $message->to ?? $notifiable->routeNotificationFor($this->notificationFor());
-
-        if (! $to) {
+        if (! $to = $notifiable->routeNotificationFor($this->notificationFor())) {
             return;
         }
+
+        $message = $this->buildMessage($notifiable, $notification);
+
+        $data = $this->buildData($message);
 
         $this->push($this->pushServiceName(), $to, $data, $message);
     }
